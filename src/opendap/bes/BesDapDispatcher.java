@@ -270,6 +270,7 @@ public class BesDapDispatcher implements DispatchHandler {
         _responders.add(d4r);
         _responders.add(new DDS(_systemPath, besApi));
         _responders.add(new DAS(_systemPath, besApi));
+        _responders.add(new CITATION(_systemPath, besApi));
         _responders.add(new RDF(_systemPath, besApi, _addFileoutTypeSuffixToDownloadFilename));
         _responders.add(new DatasetInfoHtmlPage(_systemPath, besApi));
 

@@ -68,6 +68,7 @@ public class BesApi {
 
     public static final String DDS        = "dds";
     public static final String DAS        = "das";
+    public static final String CITATION   = "citation";
     public static final String DDX        = "ddx";
     public static final String DataDDX    = "dataddx";
     public static final String DAP2_DATA  = "dods";
@@ -455,6 +456,34 @@ public class BesApi {
         besTransaction(
                 dataSource,
                 getDASRequest(dataSource,constraintExpression,xdap_accept),
+                os);
+    }
+
+    /**
+     * Writes an OPeNDAP Citation for the dataSource to the passed stream.
+     *
+     * @param dataSource           The requested DataSource
+     * @param constraintExpression The constraintElement expression to be applied to
+     *                             the request..
+     * @param xdap_accept The version of the DAP to use in building the response.
+     * @param os                   The Stream to which to write the response.
+     * @throws BadConfigurationException .
+     * @throws BESError              .
+     * @throws IOException               .
+     * @throws PPTException              .
+     */
+    public void writeCitation(String dataSource,
+                         String constraintExpression,
+                         String xdap_accept,
+                         OutputStream os)
+            throws BadConfigurationException,
+            BESError,
+            IOException,
+            PPTException {
+
+        besTransaction(
+                dataSource,
+                getCitationRequest(dataSource, constraintExpression, xdap_accept),
                 os);
     }
 
@@ -1722,6 +1751,15 @@ public class BesApi {
             throws BadConfigurationException {
 
         return getDap2RequestDocument(DAS, dataSource, ce, xdap_accept, 0, null, null, null, XML_ERRORS);
+
+    }
+
+    public Document getCitationRequest(String dataSource,
+                                  String ce,
+                                  String xdap_accept)
+            throws BadConfigurationException {
+
+        return getDap2RequestDocument(CITATION, dataSource, ce, xdap_accept, 0, null, null, null, XML_ERRORS);
 
     }
 

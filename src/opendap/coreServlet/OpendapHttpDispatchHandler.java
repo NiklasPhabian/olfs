@@ -74,6 +74,20 @@ public interface OpendapHttpDispatchHandler extends DispatchHandler {
                         throws Exception;
 
     /**
+     * Handles the client's citation request.
+     *
+     * @param request  The client's <code> HttpServletRequest</code> request
+     *                 object.
+     * @param response The server's <code> HttpServletResponse</code> response
+     *                 object.
+     * @throws Exception When things go poorly.
+     * @see ReqInfo
+     */
+    public void sendCitation(HttpServletRequest request,
+                        HttpServletResponse response)
+            throws Exception;
+
+    /**
      * ------------------------------------------------------------------------------
      * <p/>
      * Handles the client's DDS request.
