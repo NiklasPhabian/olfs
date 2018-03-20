@@ -199,6 +199,7 @@ public class MimeTypes {
         // OPeNDAP DAP2
 
         typeMap.put("das",     new String[] {"text", "x-dods_das"});
+        typeMap.put("citation",     new String[] {"text", "x-dods_citation"});
         typeMap.put("dds",     new String[] {"text", "x-dods_dds"});
         typeMap.put("dods",    new String[] {"application","octet-stream"});
         typeMap.put("xdods",   new String[] {"text","xml"});

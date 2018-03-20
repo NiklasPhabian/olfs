@@ -239,7 +239,7 @@ public class BesDapDispatcher implements DispatchHandler {
 
         // DAP2 Data Responses
         _responders.add(new Dap2Data(_systemPath, besApi, _addFileoutTypeSuffixToDownloadFilename));
-        _responders.add(   new Ascii(_systemPath, besApi));
+        _responders.add(new Ascii(_systemPath, besApi));
         //responders.add(new Ascii(systemPath, null, ".asc", besApi)); // We can uncomment this if we want to support both the dap2 ".ascii" suffix and ".asc"
         _responders.add( new CsvData(_systemPath, besApi));
         _responders.add( new Netcdf3(_systemPath, besApi, _addFileoutTypeSuffixToDownloadFilename));
