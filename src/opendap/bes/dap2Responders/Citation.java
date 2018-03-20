@@ -124,7 +124,7 @@ public class Citation extends Dap4Responder {
 
         OutputStream os = response.getOutputStream();
 
-        besApi.writeCitation(resourceID, constraintExpression, xdap_accept, os);
+        // besApi.writeCitation(resourceID, constraintExpression, xdap_accept, os);
 
         os.flush();
         log.debug("Sent DAP Citation data response.");
