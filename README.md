@@ -6,12 +6,15 @@
 <img src="http://www.esipfed.org/sites/default/files/esip-logo.png" align="right" width="300" />
 
 ## Introduction
-This repository holds the development of the citation-enabled OLFS of the OPeNDAP server Hyrax. The OLFS extrention is developed as an ESIP lab project.  
+This repository holds the development of the citation-enabled OLFS of the OPeNDAP server Hyrax. The OLFS extention is developed as an ESIP lab project.  
 
 The goal of this project is to extend the API of the Open-Source Project for a Network Data Access Protocol (OPeNDAP) to generate citations that precisely match the requested data. We have implemented these extensions in the pydap server [occur_pydap](https://github.com/NiklasPhabian/occur_pydap), and created a stand-alone server [occur](https://github.com/NiklasPhabian/occur) that intercepts requests to an OPeNDAP server and extends the API to allow to request citations. We are now extending the Open Lightweight Frontend Server (OLFS) of the Hyrax Server. 
 
 ## Phase 1 Design:
 In Phase 1, we leave the backend server (BES) unmodified and solely extend functionalities in the OLFS.
+
+[phase1_design]:doc/README/OLFSextention.jpg
+
 
 ### Rest API
 We are extending the OPeNDAP REST API to allow citation requests. E.g. a data request to data located at
@@ -31,7 +34,7 @@ The dataset metadata are extracted from the document attribute descriptor (DAS),
 ### Citation resolving
 A citation will be resolved in two steps. 
 Step 1: The data is re-requested by the client through the REST API request URL in the citation. 
-Step 2: The client sends the the hash of the citation to the OLFS. The OLFS will compare this has with the latest entry in the has log. If they do not equal each other, the OLFS will return a warning to the user that the requested data is different from the cited data.
+Step 2: The client sends the hash of the citation to the OLFS. The OLFS will compare this has with the latest entry in the has log. If they do not equal each other, the OLFS will return a warning to the user that the requested data is different from the cited data.
 
 ### DOI resolving
 The dataset metadata is obtained by querying the back-end-server for the DAS. If the DAS does not contain sufficient information, but contains a DOI, the OLFS will try to resolve the DOI and obtain the missing dataset metadata.
