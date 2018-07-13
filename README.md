@@ -13,7 +13,7 @@ The goal of this project is to extend the API of the Open-Source Project for a N
 ## Phase 1 Design:
 In Phase 1, we leave the backend server (BES) unmodified and solely extend functionalities in the OLFS.
 
-[phase1_design]:doc/README/OLFSextention.jpg
+<img src="https://github.com/NiklasPhabian/olfs/blob/master/doc/README/OLFSextention.jpg" align="center" width="100%" />
 
 
 ### Rest API
