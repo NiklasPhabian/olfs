@@ -1,0 +1,9 @@
+<Context>
+    <Resource
+            name="jdbc/sqlite"
+            type="javax.sql.DataSource"
+            driverClassName="org.sqlite.JDBC"
+            url="jdbc:sqlite:/usr/share/tomcat/db/olfs.db"
+            factory="org.apache.commons.dbcp.BasicDataSourceFactory"
+    />
+</Context>

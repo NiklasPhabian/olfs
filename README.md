@@ -29,6 +29,7 @@ The OLFS constructs the citation. A citation will be constructed from the follow
 * Dataset metadata
 * Subsetting parameters / REST API request URL
 * Hash of requested data
+
 The dataset metadata are extracted from the document attribute descriptor (DAS), which the OLFS requests from the BES. The hash of the requested data is read from the request/hash log. If there are several different hashes for the same request URL, the user will be provided with a selection of timestamped citations. If there is no entry in the has log for the REST API request URL, the OLFS will calculate the hash and the user will be provided with a warning that there might be a difference between the data stored in the OPeNDAP server at this moment and the data that the citation is intended to be created for.
 
 ### Citation resolving

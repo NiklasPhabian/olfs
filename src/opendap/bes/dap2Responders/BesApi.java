@@ -33,6 +33,7 @@ import opendap.dap4.QueryParameters;
 import opendap.logging.Procedure;
 import opendap.logging.Timer;
 import opendap.ppt.PPTException;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -455,7 +456,7 @@ public class BesApi {
 
         besTransaction(
                 dataSource,
-                getDASRequest(dataSource,constraintExpression,xdap_accept),
+                getDASRequest(dataSource, constraintExpression, xdap_accept),
                 os);
     }
 
@@ -479,12 +480,14 @@ public class BesApi {
             throws BadConfigurationException,
             BESError,
             IOException,
+            JDOMException,
             PPTException {
 
-        besTransaction(
-                dataSource,
-                getCitationRequest(dataSource, constraintExpression, xdap_accept),
-                os);
+        OutputStream das_os = new ByteArrayOutputStream(1024);
+        Document request = getDASRequest(dataSource, constraintExpression, xdap_accept);
+        besTransaction(dataSource, request, das_os);
+        String das = das_os.toString();
+
     }
 
 
@@ -1487,10 +1490,7 @@ public class BesApi {
      * @throws BadConfigurationException
      * @throws JDOMException
      */
-    public void besTransaction( String dataSource,
-                                           Document request,
-                                           Document response
-                                            )
+    public void besTransaction(String dataSource, Document request, Document response)
             throws IOException, PPTException, BadConfigurationException, JDOMException, BESError {
 
         log.debug("besTransaction started.");
@@ -1498,9 +1498,8 @@ public class BesApi {
 
         BES bes = BESManager.getBES(dataSource);
         int bes_timeout_seconds = bes.getTimeout()/1000;
-        request.getRootElement().addContent(0,setContextElement("bes_timeout",Integer.toString(bes_timeout_seconds)));
-        bes.besTransaction(request,response);
-
+        request.getRootElement().addContent(0,setContextElement("bes_timeout", Integer.toString(bes_timeout_seconds)));
+        bes.besTransaction(request, response);
 
     }
 
@@ -1597,6 +1596,7 @@ public class BesApi {
 
         return getElement(type,definition,url,returnAs,null,null);
     }
+
 
     public Element getElement(String type,
                                       String definition,
@@ -2248,7 +2248,7 @@ public class BesApi {
      * Returns a BES Request document.
      * @param type
      * @param dataSource The data set whose DDS is being requested
-     * @param ce The constraint expression to apply.
+     * @param constraintExpression The constraint expression to apply.
      * @param xdap_accept The version of the DAP to use in building the response.
      * @param maxResponseSize Maximum allowable response size.
      * @param xmlBase
@@ -2260,7 +2260,7 @@ public class BesApi {
      */
     public  Document getDap2RequestDocument(String type,
                                             String dataSource,
-                                            String ce,
+                                            String constraintExpression,
                                             String xdap_accept,
                                             int maxResponseSize,
                                             String xmlBase,
@@ -2271,14 +2271,14 @@ public class BesApi {
 
 
 
-        return getDap2RequestDocument(type, dataSource,ce, null, null, xdap_accept, maxResponseSize, xmlBase, formURL, returnAs, errorContext);
+        return getDap2RequestDocument(type, dataSource,constraintExpression, null, null, xdap_accept, maxResponseSize, xmlBase, formURL, returnAs, errorContext);
 
     }
 
 
     public  Document getDap2RequestDocument(String type,
                                             String dataSource,
-                                            String ce,
+                                            String constraintExpression,
                                             String async,
                                             String storeResult,
                                             String xdap_accept,
@@ -2294,7 +2294,7 @@ public class BesApi {
 
 
         Element e, request = new Element("request", BES_NS);
-        request.setAttribute(REQUEST_ID,getRequestIdBase());
+        request.setAttribute(REQUEST_ID, getRequestIdBase());
 
 
         if(xdap_accept!=null)
@@ -2318,14 +2318,14 @@ public class BesApi {
         Element def = defineElement("d1","default");
         e = (containerElement(getBesContainerName()));
 
-        if(ce!=null && !ce.equals(""))
-            e.addContent(constraintElement(ce));
+        if(constraintExpression!=null && !constraintExpression.equals(""))
+            e.addContent(constraintElement(constraintExpression));
 
         def.addContent(e);
 
         request.addContent(def);
 
-        e = getElement(type,"d1",formURL,returnAs,async,storeResult);
+        e = getElement(type,"d1", formURL, returnAs, async, storeResult);
 
         request.addContent(e);
 
