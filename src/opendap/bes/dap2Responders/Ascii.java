@@ -89,20 +89,6 @@ public class Ascii extends Dap4Responder {
         return super.matches(relativeUrl,checkWithBes);
     }
 
-    public boolean hashMatches(String relativeURL, String constraintExpression){
-        String subset = constraintExpression.split("&hash=")[0];
-        String hash = constraintExpression.split("&hash=")[1];
-        log.debug("Verifying string for", relativeURL);
-        String splitURL[] = relativeURL.split("\\.");
-        String returnAs = splitURL[splitURL.length - 1];
-        String dataSource = relativeURL.replace("." + returnAs, "");
-        String logHash = hashLog.getHash(subset, dataSource, returnAs);
-        if (logHash.equals(hash)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
 
     @Override
@@ -140,9 +126,9 @@ public class Ascii extends Dap4Responder {
 
         OutputStream os = response.getOutputStream();
 
-        String subset = constraintExpression.split("&hash=")[0];
+        String subset = constraintExpression.split("hash=")[0].replace("&", "");
 
-        if (constraintExpression.contains("&hash=") && !hashMatches(relativeUrl, constraintExpression)) {
+        if (constraintExpression.contains("hash=") && !hashMatches(relativeUrl, constraintExpression)) {
             os.write("hash does not match".getBytes());
         } else {
             besApi.writeDap2DataAsAscii(resourceID, subset, xdap_accept, user.getMaxResponseSize(), os);

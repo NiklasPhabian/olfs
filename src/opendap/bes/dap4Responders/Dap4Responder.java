@@ -578,6 +578,9 @@ public abstract class Dap4Responder extends BesDapResponder  {
         name += getRequestSuffix();
 
         return name;
+
+
+
     }
 
 
@@ -585,6 +588,20 @@ public abstract class Dap4Responder extends BesDapResponder  {
 
     public abstract void sendNormativeRepresentation(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
+    public boolean hashMatches(String relativeURL, String constraintExpression) {
+        String subset = constraintExpression.split("hash=")[0].replace("&", "");
+        String hash = constraintExpression.split("hash=")[1];
+        log.debug("Verifying string for", relativeURL);
+        String splitURL[] = relativeURL.split("\\.");
+        String returnAs = splitURL[splitURL.length - 1];
+        String dataSource = relativeURL.replace("." + returnAs, "");
+        String logHash = hashLog.getHash(subset, dataSource, returnAs);
+        if (logHash.equals(hash)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 
 

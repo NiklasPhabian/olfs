@@ -82,13 +82,13 @@ class RequestParser {
         Element root = request.getRootElement();
         Element tag = root.getChild("get", BES_NS);
         String type = tag.getAttributeValue("type");
-        isDODS = new String("dods").equals(type);
+        this.isDODS = new String("dods").equals(type);
     }
 
     private void getReturnAs() {
         Element root = request.getRootElement();
         Element tag = root.getChild("get", BES_NS);
-        returnAs = tag.getAttributeValue("returnAs");
+        this.returnAs = tag.getAttributeValue("returnAs");
     }
 
     private void getConstraint() {
@@ -96,7 +96,11 @@ class RequestParser {
         Element tag = root.getChild("define", BES_NS);
         tag = tag.getChild("container", BES_NS);
         tag = tag.getChild("constraint", BES_NS);
-        constraint = tag.getTextTrim();
+        if (tag ==null){
+            this.constraint = null;
+        } else {
+            this.constraint = tag.getTextTrim();
+        }
     }
 }
 
@@ -174,15 +178,14 @@ public class HashLog {
             preparedStatement.setString(3, returnAs);
             ResultSet resultSet = preparedStatement.executeQuery();
             hash = resultSet.getString(1);
+            log.debug("Has found: ", hash);
             this.disconnect();
         } catch (java.sql.SQLException e){
             log.debug("Hash not in DB", e);
-            hash = "No hash available";
         } catch (Exception e) {
             log.error("could not fetch hash", e);
         }
         return hash;
-
     }
 
     public void insertHash(byte[] hash, String query) {

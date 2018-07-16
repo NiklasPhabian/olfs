@@ -216,14 +216,24 @@ public class Citation extends Dap4Responder {
 
 
         OutputStream das_os = new ByteArrayOutputStream(1024);
-        //besApi.writeDAS(resourceID, constraintExpression, xdap_accept,das_os);
+        besApi.writeDAS(resourceID, constraintExpression, xdap_accept,das_os);
         String dasString = das_os.toString();
 
         DASParser dasParser = new DASParser(dasString);
 
+        String returnAs = "";
+        if (constraintExpression.contains("returnAs=")) {
+            returnAs = constraintExpression.split("returnAs=")[1];
+        } else {
+            os.write("no returnAs specified \n".getBytes());
+            os.flush();
+            return;
+        }
+
+
         String dataSource = relativeURL.replace(".citation", "");
-        String returnAs = constraintExpression.split("&returnAs=")[1];
-        String subset = constraintExpression.split("&returnAs=")[0];
+        String subset = constraintExpression.split("returnAs=")[0].replace("&", "");
+
         String uri = request.getRequestURI().replace(".citation", "");
         String url = request.getRequestURL().toString().replace(".citation", "");
         String hash = hashLog.getHash(subset, dataSource, returnAs);
