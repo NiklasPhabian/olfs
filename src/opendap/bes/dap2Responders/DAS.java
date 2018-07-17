@@ -49,11 +49,7 @@ public class DAS extends Dap4Responder {
 
 
     private Logger log;
-
-
-
     private static String _defaultRequestSuffix = ".das";
-
 
     public DAS(String sysPath, BesApi besApi) {
         this(sysPath,null, _defaultRequestSuffix,besApi);
@@ -109,18 +105,11 @@ public class DAS extends Dap4Responder {
         response.setStatus(HttpServletResponse.SC_OK);
         String xdap_accept = request.getHeader("XDAP-Accept");
 
-
-
-
         OutputStream os = response.getOutputStream();
 
         besApi.writeDAS(resourceID, constraintExpression, xdap_accept, os);
 
-
         os.flush();
         log.debug("Sent DAP DAS.");
-
-
     }
-
 }

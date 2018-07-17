@@ -289,7 +289,7 @@ public class OPeNDAPClient {
 
 
         _client.sendXMLRequest(request);
-        boolean val = _client.getResponse(target,error);
+        boolean val = _client.getResponse(target, error);
         commandCount++;
         return val;
     }

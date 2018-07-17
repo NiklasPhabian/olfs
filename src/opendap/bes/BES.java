@@ -32,6 +32,7 @@ import opendap.logging.Timer;
 import opendap.logging.Procedure;
 import opendap.ppt.OPeNDAPClient;
 import opendap.ppt.PPTException;
+import opendap.bes.hashing.HashLog;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -51,6 +52,15 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import java.security.MessageDigest;
+import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
+import java.security.NoSuchAlgorithmException;
+//import java.security.Security;
+
+
+
+
 /**
  * User: ndp
  * Date: Mar 19, 2007
@@ -59,7 +69,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BES {
 
     private Logger log;
-
+    private HashLog hashLog;
 
     private ArrayBlockingQueue<OPeNDAPClient> _clientQueue;
     private ConcurrentHashMap<String, OPeNDAPClient> _clients;
@@ -83,6 +93,7 @@ public class BES {
         _config = config.copy();
         log = org.slf4j.LoggerFactory.getLogger(getClass());
 
+        hashLog = new HashLog();
 
         _clientQueue = new ArrayBlockingQueue<>(getMaxClients(), true);
         _clientCheckoutLock = new ReentrantLock(true);
@@ -710,7 +721,7 @@ public class BES {
      * @throws BadConfigurationException
      * @throws JDOMException
      */
-    public void  besTransaction(Document request, Document response )
+    public void  besTransaction(Document request, Document response)
             throws IOException, PPTException, BadConfigurationException, JDOMException, BESError {
 
         log.debug("besTransaction() -  BEGIN.");
@@ -739,13 +750,18 @@ public class BES {
         try {
 
 
-            if(oc.sendRequest(request,baos,erros)){
+            if(oc.sendRequest(request, baos, erros)){
 
-                log.debug("besTransaction() The BES returned this document:\n{}",baos);
+                log.debug("besTransaction() The BES returned this document:\n{}", baos);
 
                 if(baos.size() != 0){
-
-                    doc = sb.build(new ByteArrayInputStream(baos.toByteArray()));
+                    // NG: This seems tricky ... the boas is not necessarily a wellformatted XML (e.g. for DAS)
+                    try {
+                        doc = sb.build(new ByteArrayInputStream(baos.toByteArray()));
+                    } catch (JDOMException e) {
+                        log.debug("BES Response is not a wellformatted XML", e);
+                        doc = new Document();
+                    }
 
                     // Get the root element.
                     Element root = doc.getRootElement();
@@ -759,6 +775,7 @@ public class BES {
 
                     // Set the root element to be the one sent from the BES.
                     response.setRootElement(root);
+
                 }
 
                 return;
@@ -848,8 +865,7 @@ public class BES {
             throws BadConfigurationException, IOException, PPTException, BESError {
 
 
-
-        log.debug("besTransaction() - Started.");
+        log.debug("besTransaction() - Started (DOC-OS).");
 
         boolean besTrouble = false;
         OPeNDAPClient oc = getClient();
@@ -860,22 +876,38 @@ public class BES {
             throw new IOException(msg);
 
         }
-        tweakRequestId(request,oc);
+        tweakRequestId(request, oc);
         log.debug("besTransaction() request document: \n-----------\n{}-----------\n",showRequest(request));
         LoggerFactory.getLogger("BesCommandLog").info("BES COMMAND: \n{}----------------------\n",showRequest(request));
-
-
 
         Procedure timedProc = Timer.start();
 
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-            boolean result = oc.sendRequest(request,os,baos);
+            boolean result = false;
+            try {
+                // Create a digeststream and write the output on it
+                MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
+                DigestOutputStream digestStream = new DigestOutputStream(os, messageDigest);
+                result = oc.sendRequest(request, digestStream, baos);
+
+                // Calculate hash
+                MessageDigest md = digestStream.getMessageDigest();
+                byte[] digest = md.digest();
+                log.debug("Hash Calculated");
+
+                // Insert hash to db
+                hashLog.insertHash(digest, showRequestCompact(request), request);
+
+            } catch (NoSuchAlgorithmException e) {
+                log.error("Missing algorithm",e);
+            }
+
             log.debug("besTransaction() - Completed.");
             if(!result){
 
-                log.debug("BESError: \n{}",baos.toString(HyraxStringEncoding.getCharset().name()));
+                log.debug("BESError: \n{}", baos.toString(HyraxStringEncoding.getCharset().name()));
                 ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
                 BESError besError = new BESError(bais);
 
@@ -885,7 +917,6 @@ public class BES {
                 if( besErrCode==BESError.INTERNAL_FATAL_ERROR || besErrCode==BESError.TIME_OUT ){
                     besTrouble = true;
                 }
-
                 throw besError;
             }
 
@@ -917,6 +948,12 @@ public class BES {
         XMLOutputter xmlo = new XMLOutputter(Format.getPrettyFormat());
 
         return xmlo.outputString(request);
+
+    }
+
+    String showRequestCompact(Document request) throws IOException{
+        XMLOutputter xmlo = new XMLOutputter(Format.getCompactFormat());
+        return xmlo.outputString(request).trim();
 
     }
 

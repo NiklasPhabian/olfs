@@ -34,6 +34,8 @@ import opendap.coreServlet.RequestCache;
 import opendap.dap.User;
 import opendap.http.mediaTypes.TextCsv;
 import opendap.http.mediaTypes.TextPlain;
+import opendap.bes.hashing.HashLog;
+
 import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,11 +43,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 
 
+
+
 /**
  * Responder that transmits ASCII (CSV) encoded DAP2 data to the client.
  */
 public class Ascii extends Dap4Responder {
 
+    private HashLog hashLog;
     private Logger log;
     private static String _defaultRequestSuffix = ".ascii";
 
@@ -60,6 +65,8 @@ public class Ascii extends Dap4Responder {
     public Ascii(String sysPath, String pathPrefix,  String requestSuffixRegex, BesApi besApi) {
         super(sysPath, pathPrefix, requestSuffixRegex, besApi);
         log = org.slf4j.LoggerFactory.getLogger(this.getClass());
+
+        hashLog = new HashLog();
 
         setServiceRoleId("http://services.opendap.org/dap2/ascii");
         setServiceTitle("Plain text ASCII encoded DAP2 data");
@@ -81,6 +88,7 @@ public class Ascii extends Dap4Responder {
     public boolean matches(String relativeUrl, boolean checkWithBes){
         return super.matches(relativeUrl,checkWithBes);
     }
+
 
 
     @Override
@@ -114,15 +122,17 @@ public class Ascii extends Dap4Responder {
         response.setStatus(HttpServletResponse.SC_OK);
         String xdap_accept = request.getHeader("XDAP-Accept");
 
-
-
         User user = new User(request);
-
-
 
         OutputStream os = response.getOutputStream();
 
-        besApi.writeDap2DataAsAscii(resourceID, constraintExpression, xdap_accept, user.getMaxResponseSize(), os);
+        String subset = constraintExpression.split("hash=")[0].replace("&", "");
+
+        if (constraintExpression.contains("hash=") && !hashMatches(relativeUrl, constraintExpression)) {
+            os.write("hash does not match".getBytes());
+        } else {
+            besApi.writeDap2DataAsAscii(resourceID, subset, xdap_accept, user.getMaxResponseSize(), os);
+        }
 
         os.flush();
         log.debug("Sent DAP ASCII data response.");

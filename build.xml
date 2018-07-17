@@ -196,12 +196,13 @@
     <property name="wcs.lib.dir" location="${wcs.resources.dir}/lib"/>
 
     <!-- Libraries -->
-    <property name="json.lib" value="gson-2.3.1.jar"/>
-
+    <property name="json.lib" value="gson-2.3.1.jar"/>    
+    
 
     <property name="junit.lib" value="junit-4.4.jar"/>
     <property name="jdom.lib" value="jdom-1.1.1.jar"/>
     <property name="urlRewrite.lib" value="urlrewrite-3.2.0.jar"/>
+  
 
 
     <property name="slf4j.lib" value="slf4j-api-1.6.1.jar"/>
@@ -259,6 +260,8 @@
             <include name="${owasp-encoder}"/>
             <include name="${owasp-encoder-jsp}"/>
             <include name="${json.lib}"/>
+
+            
             <include name="${jdom.lib}"/>
             <include name="${junit.lib}"/>
             <include name="${commons-cli.lib}"/>
@@ -415,8 +418,10 @@
                 <exclude name="WEB-INF/urlrewrite.xml"/>
                 <exclude name="WEB-INF/logback.xml"/>
             </fileset>
-
         </copy>
+
+        <copy file="${resources.dir}/META-INF/context.xml" todir="${build.resources}/META-INF" filtering="true"/>
+
     </target>
 
 
@@ -628,7 +633,7 @@
              manifest="resources/hexEncoder/hexEncoder.MANIFEST.MF">
             <fileset dir="${build.classes}">
                 <include name="opendap/gateway/Encoder.class"/>
-                <include name="opendap/gateway/HexAsciiEncoder.class"/>
+<!--                 <include name="opendap/gateway/HexAsciiEncoder.class"/> -->
             </fileset>
         </jar>
 
@@ -685,7 +690,7 @@
         <copy file="${lib.dir}/${saxon-xml-apis.lib}" tofile="${build.dist}/${saxon-xml-apis.lib}"/>
         <copy file="${lib.dir}/${saxon.lib}" tofile="${build.dist}/${saxon.lib}"/>
         -->
-        <copy file="${lib.dir}/${jdom.lib}" tofile="${build.dist}/${jdom.lib}"/>
+        <copy file="${lib.dir}/${jdom.lib}" tofile="${build.dist}/${jdom.lib}"/>        
 
         <jar destfile="${build.dist}/validator.jar"
              manifest="resources/META-INF/validator.MANIFEST.MF">
@@ -711,7 +716,7 @@
         <copy file="${lib.dir}/${saxon-xml-apis.lib}" tofile="${build.dist}/${saxon-xml-apis.lib}"/>
         <copy file="${lib.dir}/${saxon.lib}" tofile="${build.dist}/${saxon.lib}"/>
         -->
-        <copy file="${lib.dir}/${jdom.lib}" tofile="${build.dist}/${jdom.lib}"/>
+        <copy file="${lib.dir}/${jdom.lib}" tofile="${build.dist}/${jdom.lib}"/>        
 
         <jar destfile="${build.dist}/xslt.jar"
              manifest="resources/META-INF/xsltransformer.MANIFEST.MF">
@@ -741,7 +746,9 @@
                 <include name="${owasp-encoder}"/>
                 <include name="${owasp-encoder-jsp}"/>
 
-                <include name="${json.lib}"/>
+                <include name="${json.lib}"/>                
+
+                                          
                 <include name="${jdom.lib}"/>
                 <include name="${junit.lib}"/>
                 <include name="${urlRewrite.lib}"/>
@@ -793,13 +800,15 @@
                 <exclude name="src.distribution.readme"/>
             </zipfileset>
 
-
             <webinf dir="${build.resources}/WEB-INF">
                 <include name="logback-test.xml"/>
                 <include name="logback.xml"/>
                 <include name="urlrewrite.xml"/>
             </webinf>
 
+            <metainf dir="${build.resources}/META-INF">
+                <include name="context.xml"/>
+            </metainf>
 
         </war>
 

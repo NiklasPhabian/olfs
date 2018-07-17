@@ -181,6 +181,11 @@
     -->
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
+    <resource-ref>
+        <res-ref-name>jdbc/sqlite</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+    </resource-ref>
+    
     <servlet>
         <servlet-name>hyrax</servlet-name>
 
@@ -198,9 +203,10 @@
 
         <load-on-startup>1</load-on-startup>
 
-    </servlet>
 
-    <!-- - - - - - - - - WCS Servlet - - - - - - - - - -->
+    </servlet>
+    
+        <!-- - - - - - - - - WCS Servlet - - - - - - - - - -->
     <servlet>
         <servlet-name>wcs</servlet-name>
         <servlet-class>opendap.wcs.v2_0.http.Servlet</servlet-class>
