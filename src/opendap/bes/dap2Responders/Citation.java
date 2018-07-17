@@ -35,6 +35,7 @@ import opendap.dap.User;
 import opendap.http.mediaTypes.TextCsv;
 import opendap.http.mediaTypes.TextPlain;
 import org.slf4j.Logger;
+import org.json.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -125,6 +126,9 @@ public class Citation extends Dap4Responder {
         OutputStream os = response.getOutputStream();
 
         // besApi.writeCitation(resourceID, constraintExpression, xdap_accept, os);
+        besApi.writeDAS(resourceID, constraintExpression, xdap_accept, os);
+
+
 
         os.flush();
         log.debug("Sent DAP Citation data response.");
