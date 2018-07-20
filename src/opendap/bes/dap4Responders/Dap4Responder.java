@@ -56,11 +56,11 @@ public abstract class Dap4Responder extends BesDapResponder  {
 
     Logger _log;
 
+
     private MediaType _normativeMediaType;
     private Vector<Dap4Responder> _altResponders;
     private String _combinedRequestSuffixRegex;
     private boolean _addTypeSuffixToDownloadFilename;
-
 
 
     public Dap4Responder(String sysPath, String pathPrefix, String requestSuffix, BesApi besApi) {
@@ -588,20 +588,6 @@ public abstract class Dap4Responder extends BesDapResponder  {
 
     public abstract void sendNormativeRepresentation(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
-    public boolean hashMatches(String relativeURL, String constraintExpression) {
-        String subset = constraintExpression.split("hash=")[0].replace("&", "");
-        String hash = constraintExpression.split("hash=")[1];
-        log.debug("Verifying string for", relativeURL);
-        String splitURL[] = relativeURL.split("\\.");
-        String returnAs = splitURL[splitURL.length - 1];
-        String dataSource = relativeURL.replace("." + returnAs, "");
-        String logHash = hashLog.getHash(subset, dataSource, returnAs);
-        if (logHash.equals(hash)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
 
 
