@@ -56,11 +56,11 @@ public abstract class Dap4Responder extends BesDapResponder  {
 
     Logger _log;
 
+
     private MediaType _normativeMediaType;
     private Vector<Dap4Responder> _altResponders;
     private String _combinedRequestSuffixRegex;
     private boolean _addTypeSuffixToDownloadFilename;
-
 
 
     public Dap4Responder(String sysPath, String pathPrefix, String requestSuffix, BesApi besApi) {
@@ -578,6 +578,9 @@ public abstract class Dap4Responder extends BesDapResponder  {
         name += getRequestSuffix();
 
         return name;
+
+
+
     }
 
 

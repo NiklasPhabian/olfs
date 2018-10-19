@@ -97,7 +97,7 @@
 
     <!-- OPeNDAP Hyrax Logging -->
 
-    <logger name="opendap" level="error" >
+    <logger name="opendap" level="debug" >
         <appender-ref ref="stdout"/>
         <appender-ref ref="ErrorLog"/>
     </logger>
@@ -111,7 +111,7 @@
         <appender-ref ref="BESCommandLogAppender"/>
     </logger -->
 
-    <root level="error">
+    <root level="debug">
         <!--
             This appender, HAI_DEBUG_LOGGER, is used by the Hyrax Admin interface
             and it must appear here in the root level in order to catch all the stuff,

@@ -26,7 +26,7 @@ import javax.naming.InitialContext;
 class CurrentUtcDate {
     public static String get() {
         Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String utcTimeStamp = dateFormat.format(date);
         return utcTimeStamp;
@@ -82,13 +82,13 @@ class RequestParser {
         Element root = request.getRootElement();
         Element tag = root.getChild("get", BES_NS);
         String type = tag.getAttributeValue("type");
-        isDODS = new String("dods").equals(type);
+        this.isDODS = new String("dods").equals(type);
     }
 
     private void getReturnAs() {
         Element root = request.getRootElement();
         Element tag = root.getChild("get", BES_NS);
-        returnAs = tag.getAttributeValue("returnAs");
+        this.returnAs = tag.getAttributeValue("returnAs");
     }
 
     private void getConstraint() {
@@ -96,7 +96,11 @@ class RequestParser {
         Element tag = root.getChild("define", BES_NS);
         tag = tag.getChild("container", BES_NS);
         tag = tag.getChild("constraint", BES_NS);
-        constraint = tag.getTextTrim();
+        if (tag ==null){
+            this.constraint = null;
+        } else {
+            this.constraint = tag.getTextTrim();
+        }
     }
 }
 
@@ -140,6 +144,7 @@ public class HashLog {
 
         String dataSource = requestParser.dataSource;
         String constraint = requestParser.constraint;
+        if (constraint == null) {constraint = "";}
         String returnAs = requestParser.returnAs;
 
         String timestamp = CurrentUtcDate.get();
@@ -162,10 +167,33 @@ public class HashLog {
         }
     }
 
-    public String getHash(String constraintExpression, String dataSource, String returnAs){
+
+    public String getHash(String constr, String dataSource, String returnAs){
         String sql = "SELECT hash FROM hashes WHERE constr=? AND dataSource=? AND returnAs=?;";
         PreparedStatement preparedStatement = null;
         String hash = "";
+        try {
+            this.connect();
+            preparedStatement = this.connection.prepareStatement(sql);
+            preparedStatement.setString(1, constr);
+            preparedStatement.setString(2, dataSource);
+            preparedStatement.setString(3, returnAs);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            hash = resultSet.getString(1);
+            log.debug("Has found: ", hash);
+            this.disconnect();
+        } catch (java.sql.SQLException e){
+            log.debug("Hash not in DB", e);
+        } catch (Exception e) {
+            log.error("could not fetch hash", e);
+        }
+        return hash;
+    }
+
+    public String getHashTimeStamp(String constraintExpression, String dataSource, String returnAs){
+        String sql = "SELECT timestamp FROM hashes WHERE constr=? AND dataSource=? AND returnAs=?;";
+        PreparedStatement preparedStatement = null;
+        String timestamp = "";
         try {
             this.connect();
             preparedStatement = this.connection.prepareStatement(sql);
@@ -173,45 +201,15 @@ public class HashLog {
             preparedStatement.setString(2, dataSource);
             preparedStatement.setString(3, returnAs);
             ResultSet resultSet = preparedStatement.executeQuery();
-            hash = resultSet.getString(1);
+            timestamp = resultSet.getString(1);
+            log.debug("timestamp found: ", timestamp);
             this.disconnect();
         } catch (java.sql.SQLException e){
             log.debug("Hash not in DB", e);
-            hash = "No hash available";
         } catch (Exception e) {
             log.error("could not fetch hash", e);
         }
-        return hash;
-
-    }
-
-    public void insertHash(byte[] hash, String query) {
-        String hashString = Utils.toHex(hash);
-        log.debug("Inserting hash", hashString);
-        String sql = "INSERT INTO hashes (hash, query) VALUES (?,?);";
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = this.connection.prepareStatement(sql);
-            preparedStatement.setString(1, hashString);
-            preparedStatement.setString(2, query);
-            preparedStatement.executeUpdate();
-        } catch (Exception e) {
-            log.error("could not insert hash", e);
-        }
-    }
-
-    public void insertHash(byte[] hash) {
-        String hashString = Utils.toHex(hash);
-        log.debug("Inserting hash", hashString);
-        String sql = "INSERT INTO hashes (hash) VALUES (?);";
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = this.connection.prepareStatement(sql);
-            preparedStatement.setString(1, hashString);
-            preparedStatement.executeUpdate();
-        } catch (Exception e) {
-            log.error("could not insert hash", e);
-        }
+        return timestamp;
     }
 
 }

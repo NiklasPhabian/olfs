@@ -35,7 +35,6 @@ import opendap.dap.User;
 import opendap.http.mediaTypes.TextCsv;
 import opendap.http.mediaTypes.TextPlain;
 import opendap.bes.hashing.HashLog;
-
 import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,8 +49,8 @@ import java.io.OutputStream;
  */
 public class Ascii extends Dap4Responder {
 
-    private HashLog hashLog;
     private Logger log;
+    HashLog hashLog;
     private static String _defaultRequestSuffix = ".ascii";
 
     public Ascii(String sysPath, BesApi besApi) {
@@ -65,7 +64,6 @@ public class Ascii extends Dap4Responder {
     public Ascii(String sysPath, String pathPrefix,  String requestSuffixRegex, BesApi besApi) {
         super(sysPath, pathPrefix, requestSuffixRegex, besApi);
         log = org.slf4j.LoggerFactory.getLogger(this.getClass());
-
         hashLog = new HashLog();
 
         setServiceRoleId("http://services.opendap.org/dap2/ascii");
@@ -89,10 +87,9 @@ public class Ascii extends Dap4Responder {
         return super.matches(relativeUrl,checkWithBes);
     }
 
-    public boolean hashMatches(String relativeURL, String constraintExpression){
-        String subset = constraintExpression.split("&hash=")[0];
-        String hash = constraintExpression.split("&hash=")[1];
-        log.debug("Verifying string for", relativeURL);
+    public boolean hashMatches(String relativeURL, String constraintExpression) {
+        String subset = constraintExpression.split("hash=")[0].replace("&", "");
+        String hash = constraintExpression.split("hash=")[1];
         String splitURL[] = relativeURL.split("\\.");
         String returnAs = splitURL[splitURL.length - 1];
         String dataSource = relativeURL.replace("." + returnAs, "");
@@ -103,7 +100,6 @@ public class Ascii extends Dap4Responder {
             return false;
         }
     }
-
 
     @Override
     public void sendNormativeRepresentation(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -140,9 +136,9 @@ public class Ascii extends Dap4Responder {
 
         OutputStream os = response.getOutputStream();
 
-        String subset = constraintExpression.split("&hash=")[0];
+        String subset = constraintExpression.split("hash=")[0].replace("&", "");
 
-        if (constraintExpression.contains("&hash=") && !hashMatches(relativeUrl, constraintExpression)) {
+        if (constraintExpression.contains("hash=") && !hashMatches(relativeUrl, constraintExpression)) {
             os.write("hash does not match".getBytes());
         } else {
             besApi.writeDap2DataAsAscii(resourceID, subset, xdap_accept, user.getMaxResponseSize(), os);
@@ -150,7 +146,6 @@ public class Ascii extends Dap4Responder {
 
         os.flush();
         log.debug("Sent DAP ASCII data response.");
-
 
     }
 
